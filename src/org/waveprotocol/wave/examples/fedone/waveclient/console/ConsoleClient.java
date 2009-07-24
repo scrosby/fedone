@@ -90,7 +90,7 @@ public class ConsoleClient implements WaveletOperationListener {
     // the waves are scrolled (where the bottom is treated as the top)
     reader.addTriggeredAction('}', new ActionListener() {
       @Override public void actionPerformed(ActionEvent e) {
-        if (openWave != null) {
+        if (isWaveOpen()) {
           openWave.scrollUp(1);
           render();
         }
@@ -99,7 +99,7 @@ public class ConsoleClient implements WaveletOperationListener {
 
     reader.addTriggeredAction('{', new ActionListener() {
       @Override public void actionPerformed(ActionEvent e) {
-        if (openWave != null) {
+        if (isWaveOpen()) {
           openWave.scrollDown(1);
           render();
         }
@@ -108,7 +108,7 @@ public class ConsoleClient implements WaveletOperationListener {
 
     reader.addTriggeredAction('_', new ActionListener() {
       @Override public void actionPerformed(ActionEvent e) {
-        if (openWave != null) {
+        if (isWaveOpen()) {
           openWave.scrollToTop();
           render();
         }
@@ -133,7 +133,7 @@ public class ConsoleClient implements WaveletOperationListener {
       }
     }
 
-    if (backend != null) {
+    if (isConnected()) {
       backend.shutdown();
     }
 
@@ -283,7 +283,7 @@ public class ConsoleClient implements WaveletOperationListener {
   private void sendAppendMutation(String text) {
     if (text.length() == 0) {
       throw new IllegalArgumentException("Cannot append a empty String");
-    } else if (openWave != null) {
+    } else if (isWaveOpen()) {
       BufferedDocOp openDoc = getOpenWavelet().getDocuments().get(MAIN_DOCUMENT_ID);
       int docSize = (openDoc == null) ? 0 : ClientUtils.findDocumentSize(openDoc);
       DocOpBuilder docOp = new DocOpBuilder();
@@ -324,14 +324,16 @@ public class ConsoleClient implements WaveletOperationListener {
    * @param id the index into the inbox
    */
   private void doOpenWave(int id) {
-    List<WaveId> index = IndexUtils.getIndexEntries(backend.getIndexWave());
+    if (isConnected()) {
+      List<WaveId> index = IndexUtils.getIndexEntries(backend.getIndexWave());
 
-    if (!isConnected()) {
-      out.println("Error: not connected, run \"/connect\"");
-    } else if (id >= index.size()) {
-      out.println("Error: id is out of range");
+      if (id >= index.size()) {
+        out.println("Error: id is out of range");
+      } else {
+        setOpenWave(backend.getWave(index.get(id)));
+      }
     } else {
-      setOpenWave(backend.getWave(index.get(id)));
+      errorNotConnected();
     }
   }
 
@@ -350,7 +352,11 @@ public class ConsoleClient implements WaveletOperationListener {
    * Add a new wave.
    */
   private void newWave() {
-    backend.createNewWave();
+    if (isConnected()) {
+      backend.createNewWave();
+    } else {
+      errorNotConnected();
+    }
   }
 
   /**
@@ -359,9 +365,13 @@ public class ConsoleClient implements WaveletOperationListener {
    * @param name name of the participant to add
    */
   private void addParticipant(String name) {
-    backend.sendWaveletOperation(
-        getOpenWavelet(),
-        new AddParticipant(new ParticipantId(name)));
+    if (isWaveOpen()) {
+      backend.sendWaveletOperation(
+          getOpenWavelet(),
+          new AddParticipant(new ParticipantId(name)));
+    } else {
+      errorNoWaveOpen();
+    }
   }
 
   /**
@@ -370,9 +380,27 @@ public class ConsoleClient implements WaveletOperationListener {
    * @param name name of the participant to remove
    */
   private void removeParticipant(String name) {
-    backend.sendWaveletOperation(
-        getOpenWavelet(),
-        new RemoveParticipant(new ParticipantId(name)));
+    if (isWaveOpen()) {
+      backend.sendWaveletOperation(
+          getOpenWavelet(),
+          new RemoveParticipant(new ParticipantId(name)));
+    } else {
+      errorNoWaveOpen();
+    }
+  }
+
+  /**
+   * Print error message if user is not connected to a server.
+   */
+  private void errorNotConnected() {
+    out.println("Error: not connected, run \"/connect user@domain server port\"");
+  }
+
+  /**
+   * Print error message if user does not have a wave open.
+   */
+  private void errorNoWaveOpen() {
+    out.println("Error: no wave is open, run \"/open index\"");
   }
 
   /**
@@ -380,6 +408,13 @@ public class ConsoleClient implements WaveletOperationListener {
    */
   private boolean isConnected() {
     return backend != null;
+  }
+
+  /**
+   * @return whether the client has a wave open
+   */
+  private boolean isWaveOpen() {
+    return isConnected() && openWave != null;
   }
 
   /**
@@ -397,7 +432,7 @@ public class ConsoleClient implements WaveletOperationListener {
     List<String> inboxRender;
     List<String> waveRender;
 
-    if (backend.getIndexWave() != null) {
+    if (isConnected() && backend.getIndexWave() != null) {
       ScrollableInbox inbox = new ScrollableInbox(backend, backend.getIndexWave());
       inbox.setOpenWave(openWave == null ? null : openWave.getWave());
       inboxRender = inbox.render(getCanvassWidth(), getCanvassHeight());
@@ -406,7 +441,7 @@ public class ConsoleClient implements WaveletOperationListener {
       ConsoleUtils.ensureHeight(getCanvassWidth(), getCanvassHeight(), inboxRender);
     }
 
-    if (openWave != null) {
+    if (isWaveOpen()) {
       waveRender = openWave.render(getCanvassWidth(), getCanvassHeight());
     } else {
       waveRender = Lists.newArrayList();
