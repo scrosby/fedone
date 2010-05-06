@@ -59,8 +59,7 @@ public class ServerMain {
 
     Injector injector = Guice.createInjector(new ServerModule(), flags);
     ComponentPacketTransport xmppComponent = injector.getInstance(ComponentPacketTransport.class);
-    ServerRpcProvider server = new ServerRpcProvider(injector.getInstance(
-        RpcInetSocketAddressFactory.class).create());
+    ServerRpcProvider server = injector.getInstance(ServerRpcProvider.class);
     ProtocolWaveClientRpc.Interface rpcImpl = injector.getInstance(
         ProtocolWaveClientRpc.Interface.class);
     server.registerService(ProtocolWaveClientRpc.newReflectiveService(rpcImpl));
@@ -70,26 +69,7 @@ public class ServerMain {
       System.err.println("couldn't connect to XMPP server:" + e);
     }
     LOG.info("Starting server");
-    server.startServer();
-  }
-
-  /** Creates InetSocketAddresses from injected parameters */
-  static class RpcInetSocketAddressFactory {
-
-    private final String host;
-    private final Integer port;
-
-    @Inject
-    RpcInetSocketAddressFactory(@Named("client_frontend_hostname") String host,
-        @Named("client_frontend_port") Integer port) {
-      this.host = host;
-      this.port = port;
-      LOG.info("Starting client frontend on host: " + host + " port: " + port);
-    }
-
-    InetSocketAddress create() {
-      return new InetSocketAddress(host, port);
-    }
-
+    server.startRpcServer();
+    server.startWebSocketServer();
   }
 }

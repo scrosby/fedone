@@ -72,7 +72,7 @@ public class FakeProtoChannelManager {
   }
 
   public FakeProtoChannelManager(ByteChannel channel) {
-    this.channel = new SequencedProtoChannel(channel, new SequencedProtoChannel.ProtoCallback() {
+    this.channel = new SequencedProtoChannel(channel, new ProtoCallback() {
       @Override
       public void message(long sequenceNo, Message message) {
         queue.add(SequencedObject.of(sequenceNo, message));
@@ -80,6 +80,11 @@ public class FakeProtoChannelManager {
 
       @Override
       public void unknown(long sequenceNo, String messageType, UnknownFieldSet message) {
+        queue.add(SequencedObject.of(sequenceNo, message));
+      }
+
+      @Override
+      public void unknown(long sequenceNo, String messageType, String message) {
         queue.add(SequencedObject.of(sequenceNo, message));
       }
     });

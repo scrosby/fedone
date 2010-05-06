@@ -20,7 +20,9 @@ package org.waveprotocol.wave.examples.fedone.rpc;
 import com.google.common.collect.Maps;
 import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.CodedOutputStream;
+import com.google.protobuf.JsonFormat;
 import com.google.protobuf.Message;
+import com.google.protobuf.MessageLite;
 import com.google.protobuf.UnknownFieldSet;
 
 import org.waveprotocol.wave.examples.fedone.util.Log;
@@ -39,20 +41,14 @@ import java.util.concurrent.Executors;
  * 
  *
  */
-public class SequencedProtoChannel {
+public class SequencedProtoChannel extends MessageExpectingChannel {
   private static final Log LOG = Log.get(SequencedProtoChannel.class);
-  private final Map<String, Message> expectedMessages = Maps.newHashMap();
   private final CodedOutputStream outputStream;
   private final ByteChannel channel;
   private final ExecutorService threadPool;
   private final Runnable asyncRead;
   private boolean isReading = false;
   
-  public interface ProtoCallback {
-    public void message(long sequenceNo, Message message);
-    public void unknown(long sequenceNo, String messageType, UnknownFieldSet message);
-  }
-
   /**
    * Internal helper method to remove and return the specified number of bytes
    * from the beginning of the specified ByteBuffer.
@@ -122,7 +118,7 @@ public class SequencedProtoChannel {
                   CodedInputStream inputStream = CodedInputStream.newInstance(buffer);
                   long incomingSequenceNo = inputStream.readInt64();
                   String messageType = inputStream.readString();
-                  Message prototype = expectedMessages.get(messageType);
+                  Message prototype = getMessagePrototype(messageType);
                   if (prototype == null) {
                     LOG.info("Received misunderstood message (??? " + messageType + " ???, seq "
                         + incomingSequenceNo + ") from: " + channel);
@@ -163,6 +159,16 @@ public class SequencedProtoChannel {
       public void write(int b) throws IOException {
         channel.write(ByteBuffer.wrap(new byte[] {(byte) b}));
       }
+
+      @Override
+      public void write(byte[] buf) throws IOException {
+        channel.write(ByteBuffer.wrap(buf));
+      }
+
+      @Override
+      public void write(byte[] buf, int off, int len) throws IOException {
+        channel.write(ByteBuffer.wrap(buf, off, len));
+      }
     });
   }
 
@@ -178,6 +184,7 @@ public class SequencedProtoChannel {
    * Kick off this class's asynchronous read method. Must be called to receive
    * any messages on the callback.
    */
+  @Override
   public void startAsyncRead() {
     if (isReading) {
       throw new IllegalStateException("This protoChannel is already reading asynchronously.");
@@ -187,28 +194,22 @@ public class SequencedProtoChannel {
   }
   
   /**
-   * Register an expected incoming message type.
-   * 
-   * @param messagePrototype the prototype of the expected type
-   */
-  public void expectMessage(Message messagePrototype) {
-    expectedMessages.put(messagePrototype.getDescriptorForType().getFullName(), messagePrototype);
-  }
-
-  /**
    * Send the given message across the connection along with the sequence number.
    * 
    * @param sequenceNo
    * @param message
    */
   public void sendMessage(long sequenceNo, Message message) {
-    String messageType = message.getDescriptorForType().getFullName();
+    internalSendMessage(sequenceNo, message, message.getDescriptorForType().getFullName());
+  }
+
+  private void internalSendMessage(long sequenceNo, MessageLite message, String messageType) {
+    int messageSize = message.getSerializedSize();
     int size = CodedOutputStream.computeInt64SizeNoTag(sequenceNo)
-            + CodedOutputStream.computeStringSizeNoTag(messageType)
-            + CodedOutputStream.computeMessageSizeNoTag(message);
+             + CodedOutputStream.computeStringSizeNoTag(messageType)
+             + CodedOutputStream.computeMessageSizeNoTag(message);
     // TODO: change to LOG.debug
-    LOG.fine("Sending message (" + message.getDescriptorForType().getFullName() + ", seq "
-        + sequenceNo + ") to: " + channel);
+    LOG.fine("Sending message (" + messageType + ", seq " + sequenceNo + ") to: " + channel);
     // Only one message should be written at at time.
     synchronized (outputStream) {
       try {
@@ -222,19 +223,5 @@ public class SequencedProtoChannel {
         throw new IllegalStateException(e);
       }
     }
-  }
-
-  /**
-   * Helper method around {{@link #sendMessage(long, Message)} which
-   * automatically registers the response type as an expected input to this
-   * SequencedProtoChannel.
-   * 
-   * @param sequenceNo
-   * @param message
-   * @param expectedResponsePrototype
-   */
-  public void sendMessage(long sequenceNo, Message message, Message expectedResponsePrototype) {
-    expectMessage(expectedResponsePrototype);
-    sendMessage(sequenceNo, message);
   }
 }
