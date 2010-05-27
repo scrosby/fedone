@@ -17,7 +17,7 @@
 package org.waveprotocol.wave.examples.fedone;
 
 /**
- * Flags configuration for XMPP module.
+ * Flags configuration for WaveServer Module.
  *
  *
  */
@@ -61,4 +61,11 @@ public class FlagSettings {
 
   @Flag(name="waveserver_disable_signer_verification")
   private static boolean waveserverDisableSignerVerification;
+
+  @Flag(name="delta_bundling_accumulation_delay_ms", description="The delay, in ms, during" +
+  		" which to accumulate deltas in a bundle before singing it. Value must be >= 0 ms")
+  private static int deltaBundlingAccumulationDelay;
+  @Flag(name="maximum_delta_bundle_size", description="The largest bundle size to accumulate before " +
+  		"signing. If set to 1, will do straightforward delta signing.")
+private static int deltaBundleSize;
 }

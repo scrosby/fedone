@@ -31,7 +31,9 @@ import org.waveprotocol.wave.protocol.common.ProtocolWaveletDelta;
 import java.util.Set;
 
 /**
- * Interface for the certificate manager.
+ * Stand-in interface for the certificate manager.
+ *
+ *
  */
 @ImplementedBy(CertificateManagerImpl.class)
 public interface CertificateManager {
