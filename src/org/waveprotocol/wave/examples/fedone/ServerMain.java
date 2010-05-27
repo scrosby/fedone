@@ -36,8 +36,6 @@ import java.net.InetSocketAddress;
 
 /**
  * Prototype server entrypoint.
- *
- *
  */
 public class ServerMain {
 

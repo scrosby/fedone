@@ -25,6 +25,10 @@ import org.waveprotocol.wave.protocol.common.ProtocolHashedVersion;
 import java.util.List;
 
 /**
+ * These are the methods supported by a Wavelet Federation Listener:
+ * it acts as a receiver of updates i.e. the WaveServer receives from
+ * a Federation Remote or Federation Remote receives from a Federation Host.
+ *
  *
  */
 public interface WaveletFederationListener {
