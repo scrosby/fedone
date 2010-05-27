@@ -26,10 +26,10 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.protobuf.ByteString;
 
-import org.waveprotocol.wave.examples.fedone.crypto.WaveSigner;
+import org.waveprotocol.wave.crypto.WaveSigner;
 import org.waveprotocol.wave.examples.fedone.waveserver.CertificateManager.SignatureResultListener;
-import org.waveprotocol.wave.protocol.common.ProtocolSignedDelta;
-import org.waveprotocol.wave.protocol.common.ProtocolWaveletDelta;
+import org.waveprotocol.wave.federation.Proto.ProtocolSignedDelta;
+import org.waveprotocol.wave.federation.Proto.ProtocolWaveletDelta;
 
 import java.util.concurrent.ScheduledExecutorService;
 
