@@ -34,9 +34,7 @@ import org.waveprotocol.wave.waveserver.WaveletFederationProvider;
 import java.util.Set;
 
 /**
- * Stand-in interface for the certificate manager.
- *
- *
+ * Interface for the certificate manager.
  */
 public interface CertificateManager {
 
@@ -48,13 +46,29 @@ public interface CertificateManager {
   WaveSigner getLocalSigner();
 
   /**
+   * Signatures are generated asynchronously. They may be batched into trees and signed in
+   * one go. The result will contain all necessary info to send the delta off independently
+   * (i.e. the signature tree will have been winnowed, refer
+   * http://www.waveprotocol.org/whitepapers/wave-protocol-verification)
+   */
+  interface SignatureResultListener {
+    /**
+     * Process the result of a signing. The callee may perform work on the thread.
+     * @param signedDelta the delta with signature.
+     */
+    void signatureResult(ProtocolSignedDelta signedDelta);
+  }
+
+  /**
    * Verify the signature in the Signed Delta. Use the local WSP's certificate
    * to sign the delta.
    *
    * @param delta as a byte string (the serialised representation of a ProtocolWaveletDelta)
-   * @return signed delta
+   * @param resultListener is a callback for receiving the result.
    */
-  ProtocolSignedDelta signDelta(ByteStringMessage<ProtocolWaveletDelta> delta);
+  void signDelta(ByteStringMessage<ProtocolWaveletDelta> delta,
+      SignatureResultListener resultListener);
+
 
   /**
    * Verify the signature in the Signed Delta. Use the delta's author's WSP
