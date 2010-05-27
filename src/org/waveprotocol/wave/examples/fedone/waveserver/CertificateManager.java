@@ -34,9 +34,7 @@ import org.waveprotocol.wave.waveserver.WaveletFederationProvider;
 import java.util.Set;
 
 /**
- * Stand-in interface for the certificate manager.
- *
- *
+ * Interface for the certificate manager.
  */
 public interface CertificateManager {
 
