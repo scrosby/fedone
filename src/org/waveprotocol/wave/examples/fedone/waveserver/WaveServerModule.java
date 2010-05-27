@@ -38,6 +38,9 @@ import org.waveprotocol.wave.crypto.WaveSigner;
 import org.waveprotocol.wave.examples.fedone.waveserver.WaveClientRpc.ProtocolWaveClientRpc;
 import org.waveprotocol.wave.model.id.WaveletName;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 /**
  * Guice Module for the prototype Server.
  *
@@ -57,6 +60,21 @@ public class WaveServerModule extends AbstractModule {
     public RemoteWaveletContainer create(WaveletName waveletName) {
       return new RemoteWaveletContainerImpl(waveletName);
     }
+  }
+
+  // NOTE:
+  // This is a fairly important thread pool: It's currently used by the bundling
+  // signer... see DeltaSignerProvider.java.
+  // For each bundle the thread will perform the signature and call the
+  // listener for each signing request, this will do work like submit deltas
+  // to wavelets and broadcast results of the submit. Depending on the timeout
+  // on the bundling accumulation delay and bundle size parameters, the thread
+  // pool size will affect the performance of your server when it comes to
+  // dealing with client submits. (see WaveServerImpl.submitDelta).
+
+  @Provides
+  private static ScheduledExecutorService provideScheduledExecutorService() {
+    return Executors.newScheduledThreadPool(4);
   }
 
   @Override
