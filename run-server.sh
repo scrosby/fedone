@@ -21,5 +21,7 @@ java -jar dist/fedone-server-$FEDONE_VERSION.jar \
   --certificate_private_key=$PRIVATE_KEY_FILENAME \
   --certificate_files=$CERTIFICATE_FILENAME_LIST \
   --certificate_domain=$CERTIFICATE_DOMAIN_NAME \
+  --delta_bundling_accumulation_delay_ms=0 \
+  --maximum_delta_bundle_size=1 \
   --waveserver_disable_verification=$WAVESERVER_DISABLE_VERIFICATION \
   --waveserver_disable_signer_verification=$WAVESERVER_DISABLE_SIGNER_VERIFICATION
