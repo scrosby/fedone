@@ -57,15 +57,19 @@ public class CertificateManagerImpl implements CertificateManager {
   private final CertPathStore certPathStore;
   private final boolean disableVerfication;
 
+  private final DeltaSigner deltaSigner;
+
   @Inject
   public CertificateManagerImpl(
       @Named("waveserver_disable_verification") boolean disableVerfication,
-      WaveSigner signer, WaveSignatureVerifier verifier, CertPathStore certPathStore) {
+      WaveSigner signer, WaveSignatureVerifier verifier, CertPathStore certPathStore,
+      DeltaSigner deltaSigner) {
+
     this.disableVerfication = disableVerfication;
     this.waveSigner = signer;
     this.verifier = verifier;
     this.certPathStore = certPathStore;
-
+    this.deltaSigner = deltaSigner;
     if (disableVerfication) {
       LOG.warning("** SIGNATURE VERIFICATION DISABLED ** "
           + "see flag \"waveserver_disable_verification\"");
@@ -85,18 +89,13 @@ public class CertificateManagerImpl implements CertificateManager {
   }
 
   @Override
-  public ProtocolSignedDelta signDelta(ByteStringMessage<ProtocolWaveletDelta> delta) {
+  public void signDelta(ByteStringMessage<ProtocolWaveletDelta> delta,
+      SignatureResultListener resultListener) {
 
     // TODO: support extended address paths. For now, there will be exactly
     // one signature, and we don't support federated groups.
     Preconditions.checkState(delta.getMessage().getAddressPathCount() == 0);
-
-    ProtocolSignedDelta.Builder signedDelta = ProtocolSignedDelta.newBuilder();
-
-    signedDelta.setDelta(delta.getByteString());
-    signedDelta.addAllSignature(ImmutableList.of(waveSigner.sign(
-        delta.getByteString().toByteArray())));
-    return signedDelta.build();
+    deltaSigner.sign(delta, resultListener);
   }
 
   @Override
