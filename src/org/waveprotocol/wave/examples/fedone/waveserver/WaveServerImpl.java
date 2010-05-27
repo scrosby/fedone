@@ -375,12 +375,17 @@ public class WaveServerImpl implements WaveServer {
   }
 
   @Override
-  public void submitRequest(WaveletName waveletName, ProtocolWaveletDelta delta,
-      SubmitResultListener listner) {
-    // The serilalised version of this delta happens now.  This should be the only place, ever!
-    ProtocolSignedDelta signedDelta = certificateManager.signDelta(
-        ByteStringMessage.fromMessage(delta));
-    submitDelta(waveletName, signedDelta, listner);
+  public void submitRequest(final WaveletName waveletName, ProtocolWaveletDelta delta,
+      final SubmitResultListener listener) {
+    // The submitted delta is now serialized, from now on it's the canonical delta (i.e. it should
+    // never be deserialized and regenerated anywhere (even in other waveservers).
+    certificateManager.signDelta(ByteStringMessage.fromMessage(delta),
+      new CertificateManager.SignatureResultListener() {
+        @Override
+        public void signatureResult(ProtocolSignedDelta signedDelta) {
+          submitDelta(waveletName, signedDelta, listener);
+        }
+    });
   }
 
   // -------------------------------------------------------------------------------------------
