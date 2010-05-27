@@ -19,7 +19,7 @@ package org.waveprotocol.wave.examples.fedone.waveserver;
 
 import com.google.inject.ProvidedBy;
 
-import org.waveprotocol.wave.protocol.common.ProtocolWaveletDelta;
+import org.waveprotocol.wave.federation.Proto.ProtocolWaveletDelta;
 
 @ProvidedBy(DeltaSignerProvider.class)
 public interface DeltaSigner {
