@@ -1,11 +1,10 @@
 package wave.util.wavesig;
 
 import java.util.Arrays;
-import java.util.HashMap;
-
 import org.rice.crosby.batchsig.Message;
 import org.rice.crosby.batchsig.Signer;
 import org.rice.crosby.historytree.MerkleTree;
+import org.rice.crosby.historytree.NodeCursor;
 import org.rice.crosby.historytree.aggs.SHA256Agg;
 import org.rice.crosby.historytree.generated.Serialization.PrunedTree;
 import org.rice.crosby.historytree.generated.Serialization.SigConfig;
@@ -37,11 +36,13 @@ public class Verifier {
 		MerkleTree<byte[],byte[]> parsed=parseTree(sigblob.getTree());
 		final byte[] rootHash = parsed.agg();
 
-		// See if the message is in the tree.
-		byte [] leafagg = parsed.leaf(sigblob.getLeaf()).getAgg();
-		byte [] msgagg = parsed.getAggObj().aggVal(message.getData());
+        // See if the message is in the tree.
+        NodeCursor<byte[], byte[]> leaf = parsed.leaf(sigblob.getLeaf());
+        if (leaf == null)
+            return false;
+        byte [] leafagg = leaf.getAgg();
+        byte [] msgagg = parsed.getAggObj().aggVal(message.getData());
 		
-		// FIXME! THIS WILL THROW AN ERROR THATS NOT BEING CAUGHT ON INVALID PROOF.
 		if (! Arrays.equals(msgagg,leafagg))
 			// Nope, we fail.
 			return false;
