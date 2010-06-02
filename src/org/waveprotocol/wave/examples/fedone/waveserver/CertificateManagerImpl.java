@@ -112,7 +112,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
     signedDelta.setDelta(delta.getByteString());
     signedDelta.addAllSignature(ImmutableList.of(waveSigner.sign(
-        delta.getByteString().toByteArray())));
+        delta.getByteString().toByteArray()).build()));
     return signedDelta.build();
   }
 

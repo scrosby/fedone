@@ -77,18 +77,18 @@ public class WaveSigner {
    * @param payload the bits that are to be signed.
    * @return the {@link SignerInfo} object.
    */
-  public ProtocolSignature sign(byte[] payload) {
+  public ProtocolSignature.Builder sign(byte[] payload) {
 
     try {
       Signature signer = Signature.getInstance(
           AlgorithmUtil.getJceName(algorithm));
       signer.initSign(signingKey);
       signer.update(payload);
+      // TODO: FIX THIS.
       return ProtocolSignature.newBuilder()
           .setSignatureBytes(ByteString.copyFrom(signer.sign()))
           .setSignerId(ByteString.copyFrom(signerInfo.getSignerId()))
-          .setSignatureAlgorithm(algorithm)
-          .build();
+          .setSignatureAlgorithm(algorithm);
 
     } catch (java.security.SignatureException e) {
 

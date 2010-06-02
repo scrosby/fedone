@@ -205,13 +205,42 @@ message ProtocolSignedDelta {
  */
 message ProtocolSignature {
 
+  // Denotes what is signed, included as part of signature.
   enum SignatureAlgorithm {
     SHA1_RSA = 1;
   }
 
+  enum AuthenticationAlgorithm {
+    DIRECT = 1;
+    SHA256_MERKLE_TREE = 2;
+  }
+
+  // What is signed. (but is not sent)
+  message SignedObject {
+     required AuthenticationAlgorithm config = 1;How it was authenticated
+
+     // For DIRECT
+     optional bytes hash = 2;
+
+     // For merkle tree signatures.
+     optional int32 version = 3;
+     optional bytes roothash = 4;
+  }
+  
+  // Used to determine the decoding of signature_bytes in the
+  // authentication of a message. NOT AUTHENTICATED.
+  enum SignatureType {
+     SHA1_RSA = 1;
+     SINGLE_MERKLE_TREE = 3;  // One pruned tree per message.
+  };
+  
   required bytes signature_bytes = 1;
   required bytes signer_id = 2;
-  required SignatureAlgorithm signature_algorithm = 3;
+  required SignatureType signature_algorithm = 3;
+
+  // For Merkle tree signatures.
+  optional bytes serialized_tree = 4;
+  optional int32 leaf = 5;
 }
 
 /**

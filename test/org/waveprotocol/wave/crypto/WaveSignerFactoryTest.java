@@ -89,7 +89,7 @@ public class WaveSignerFactoryTest extends TestCase {
     WaveSignerFactory factory = new WaveSignerFactory();
     WaveSigner signer = factory.getSigner(keyStream, certStreams, domain);
 
-    ProtocolSignature signature = signer.sign(MESSAGE);
+    ProtocolSignature signature = signer.sign(MESSAGE).build();
 
     assertTrue(Arrays.equals(SIGNATURE,
         signature.getSignatureBytes().toByteArray()));

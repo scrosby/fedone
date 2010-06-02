@@ -47,7 +47,7 @@ public class WaveSignerTest extends TestCase {
 
   public void testSign() throws Exception {
     byte[] payload = "hello".getBytes();
-    ProtocolSignature signature = signer.sign(payload);
+    ProtocolSignature signature = signer.sign(payload).build();
 
     assertEquals(SignatureAlgorithm.SHA1_RSA,
         signature.getSignatureAlgorithm());
@@ -64,7 +64,7 @@ public class WaveSignerTest extends TestCase {
     long start = System.currentTimeMillis();
     long ops = 0;
     while (System.currentTimeMillis() < start + 1000L) {
-      ProtocolSignature signature = signer.sign(payload);
+      ProtocolSignature signature = signer.sign(payload).build();
       ++ops;
     }
     long stop = System.currentTimeMillis();
