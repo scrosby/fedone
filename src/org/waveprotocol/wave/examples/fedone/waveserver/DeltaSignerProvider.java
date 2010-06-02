@@ -83,7 +83,7 @@ public class DeltaSignerProvider  implements Provider<DeltaSigner> {
         ProtocolSignedDelta.Builder signedDelta = ProtocolSignedDelta.newBuilder();
         ByteString deltaBytes =  delta.getByteString();
         signedDelta.setDelta(deltaBytes);
-        signedDelta.addAllSignature(ImmutableList.of(waveSigner.sign(deltaBytes.toByteArray())));
+        signedDelta.addAllSignature(ImmutableList.of(waveSigner.sign(deltaBytes.toByteArray()).build()));
         resultListener.signatureResult(signedDelta.build());
       }
 

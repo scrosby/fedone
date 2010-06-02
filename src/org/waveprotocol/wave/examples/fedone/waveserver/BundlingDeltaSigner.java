@@ -90,7 +90,7 @@ class BundlingDeltaSigner implements DeltaSigner {
         ProtocolSignedDelta.Builder signedDelta = ProtocolSignedDelta.newBuilder();
         ByteString deltaBytes =  entry.getKey().getByteString();
         signedDelta.setDelta(deltaBytes);
-        signedDelta.addAllSignature(ImmutableList.of(signer.sign(deltaBytes.toByteArray())));
+        signedDelta.addAllSignature(ImmutableList.of(signer.sign(deltaBytes.toByteArray()).build()));
         entry.getValue().signatureResult(signedDelta.build());
       }
     }
