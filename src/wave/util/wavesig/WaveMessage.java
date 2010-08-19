@@ -1,7 +1,7 @@
 package wave.util.wavesig;
 
-import org.rice.crosby.batchsig.Message;
-import org.rice.crosby.historytree.generated.Serialization.TreeSigBlob;
+import edu.rice.batchsig.Message;
+import edu.rice.historytree.generated.Serialization.TreeSigBlob;
 import org.waveprotocol.wave.examples.fedone.waveserver.ByteStringMessage;
 import org.waveprotocol.wave.examples.fedone.waveserver.CertificateManager;
 import org.waveprotocol.wave.federation.Proto.ProtocolWaveletDelta;

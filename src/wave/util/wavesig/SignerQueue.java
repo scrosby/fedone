@@ -1,22 +1,22 @@
 package wave.util.wavesig;
 
 import java.util.ArrayList;
-
-import org.rice.crosby.batchsig.MerkleQueue;
-import org.rice.crosby.batchsig.Message;
-import org.rice.crosby.batchsig.QueueBase;
-import org.rice.crosby.batchsig.SignaturePrimitives;
-import org.rice.crosby.historytree.AggregationInterface;
-import org.rice.crosby.historytree.MerkleTree;
-import org.rice.crosby.historytree.ProofError;
-import org.rice.crosby.historytree.aggs.SHA256Agg;
-import org.rice.crosby.historytree.generated.Serialization.PrunedTree;
-import org.rice.crosby.historytree.generated.Serialization.SigTreeType;
-import org.rice.crosby.historytree.generated.Serialization.TreeSigBlob;
-import org.rice.crosby.historytree.generated.Serialization.TreeSigMessage;
-import org.rice.crosby.historytree.generated.Serialization.SignatureType;
-import org.rice.crosby.historytree.storage.ArrayStore;
-import org.rice.crosby.historytree.storage.HashStore;
+//edu.rice.batchsig.
+import edu.rice.batchsig.MerkleQueue;
+import edu.rice.batchsig.Message;
+import edu.rice.batchsig.QueueBase;
+import edu.rice.batchsig.SignaturePrimitives;
+import edu.rice.historytree.AggregationInterface;
+import edu.rice.historytree.MerkleTree;
+import edu.rice.historytree.ProofError;
+import edu.rice.historytree.aggs.SHA256Agg;
+import edu.rice.historytree.generated.Serialization.PrunedTree;
+import edu.rice.historytree.generated.Serialization.SigTreeType;
+import edu.rice.historytree.generated.Serialization.TreeSigBlob;
+import edu.rice.historytree.generated.Serialization.TreeSigMessage;
+import edu.rice.historytree.generated.Serialization.SignatureType;
+import edu.rice.historytree.storage.ArrayStore;
+import edu.rice.historytree.storage.HashStore;
 import org.waveprotocol.wave.crypto.WaveSigner;
 import org.waveprotocol.wave.examples.fedone.waveserver.ByteStringMessage;
 import org.waveprotocol.wave.examples.fedone.waveserver.DeltaSigner;
